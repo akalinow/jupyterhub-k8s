@@ -1,0 +1,159 @@
+# This file can update the JupyterHub Helm chart's default configuration values.
+#
+# For reference see the configuration reference and default values, but make
+# sure to refer to the Helm chart version of interest to you!
+#
+# Introduction to YAML:     https://www.youtube.com/watch?v=cdLNKUoMc6c
+# Chart config reference:   https://zero-to-jupyterhub.readthedocs.io/en/stable/resources/reference.html
+# Chart default values:     https://github.com/jupyterhub/zero-to-jupyterhub-k8s/blob/HEAD/jupyterhub/values.yaml
+# Available chart versions: https://hub.jupyter.org/helm-chart/
+#
+
+proxy:
+  https:
+    enabled: true
+    hosts:
+      - 0.0.0.0
+    type: secret
+    secret:
+      name: tls-secret
+  service:
+    type: NodePort
+    nodePorts:
+      https: 32443
+hub:    
+  extraEnv:
+    OAUTH_CLIENT_ID:
+      valueFrom:
+        secretKeyRef:
+          name: google-oauth-secret
+          key: client-id
+    OAUTH_CLIENT_SECRET:
+      valueFrom:
+        secretKeyRef:
+          name: google-oauth-secret
+          key: client-secret
+
+  extraConfig:
+      01-google-oauth.py: |
+        import os
+        c.GoogleOAuthenticator.client_id = os.environ["OAUTH_CLIENT_ID"]
+        c.GoogleOAuthenticator.client_secret = os.environ["OAUTH_CLIENT_SECRET"]
+
+  config:
+    Authenticator:
+      admin_users:
+        - akalinow
+      allowed_users:
+        - a.kalinowski2@uw.edu.pl
+    GoogleOAuthenticator:
+      oauth_callback_url: https://hepzc62.hep.fuw.edu.pl:32443/hub/oauth_callback
+      hosted_domain:
+        - uw.edu.pl
+        - student.uw.edu.pl
+      login_service: uw.edu.pl or student.uw.edu.pl
+      username_claim: email
+    #######################################
+    JupyterHub:
+        authenticator_class: google
+    
+    KubeSpawner:
+      # Pod resource limits and guarantees
+      cpu_limit: 2
+      cpu_guarantee: 0.5
+      mem_limit: 8G
+      mem_guarantee: 1G
+      
+      ################################################
+      # User-selectable image profiles
+      profile_list:
+        - display_name: "TensorFlow GPU"
+          description: "TensorFlow with GPU support"
+          kubespawner_override:
+            image: quay.io/jupyter/tensorflow-notebook:cuda-latest
+            default: true
+            cpu_limit: 2
+            cpu_guarantee: 0.5
+            mem_limit: 32G
+            mem_guarantee: 8G
+            nvidia.com/gpu: "1"
+#######################################################
+#######################################################
+singleuser:
+  initContainers:
+    - name: create-user-scratch
+      image: busybox
+      command: ["sh", "-c", "mkdir -p /scratch/$JUPYTERHUB_USER && chown 1000:1000 /scratch/$JUPYTERHUB_USER"]
+      env:
+        - name: JUPYTERHUB_USER
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['hub.jupyter.org/username']
+
+  # Default image (used if user doesn't select)
+  image:
+    name: akalinow/tensorflow-gpu
+    tag: latest  
+  cmd: null
+  cpu:
+    limit: 2
+    guarantee: 0.5
+  memory:
+    limit: 8G
+    guarantee: 1G
+  storage:
+    type: dynamic
+    dynamic:
+      storageClass: scratch-local
+      pvcNameTemplate: scratch-local-{username}
+      volumeNameTemplate: volume-{username}
+      storageAccessModes:
+        - ReadWriteOnce
+    homeMountPath: /home/jovyan
+    extraVolumes:
+      01-cvmfs-cms:
+        name: cvmfs-cms
+        persistentVolumeClaim:
+          claimName: cvmfs-cern-cms
+      02-cvmfs-sft:
+        name: cvmfs-sft
+        persistentVolumeClaim:
+          claimName: cvmfs-cern-sft
+      03-cvmfs-grid:
+        name: cvmfs-grid
+        persistentVolumeClaim:
+          claimName: cvmfs-cern-grid    
+      04-cvmfs-cms-opendata:
+        name: cvmfs-cms-opendata
+        persistentVolumeClaim:
+          claimName: cvmfs-cern-opendata-conddb
+      05-cmsse:
+        name: cmsse-nfs
+        persistentVolumeClaim:
+          claimName: cmsse-nfs-pvc
+    extraVolumeMounts:
+      01-cvmfs-cms:
+        name: cvmfs-cms
+        mountPath: /cvmfs/cms.cern.ch
+        readOnly: true
+      02-cvmfs-sft:
+        name: cvmfs-sft
+        mountPath: /cvmfs/sft.cern.ch
+        readOnly: true
+      03-cvmfs-grid:
+        name: cvmfs-cern-grid
+        mountPath: /cvmfs/grid.cern.ch
+        readOnly: true
+      04-cvmfs-cms-opendata:
+        name: cvmfs-cern-opendata-conddb
+        mountPath: /cvmfs/cms-opendata-conddb.cern.ch
+        readOnly: true
+      05-cmsse:
+        name: cmsse-nfs
+        mountPath: /scratch_cmsse
+        readOnly: true
+
+
+#######################################################
+#######################################################
+

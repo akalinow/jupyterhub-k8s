@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cmsse-nfs-pvc
+spec:
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: nfs-storage
+  resources:
+    requests:
+      storage: 1Ti
