@@ -14,8 +14,8 @@ minikube mount /scratch:/scratch &
 kubectl create secret tls tls-secret --cert=cert.pem --key=key_pkcs1.pem 
 
 ## Add persistent volume and claim for bare-metal storage
-kubectl apply -f local-pvs/persistent-volume.yaml
-kubectl apply -f local-pvs/persistent-volume-claim.yaml
+kubectl apply -f persistent-volume.yaml
+kubectl apply -f persistent-volume-claim.yaml
 
 ## Add cvmfs volumes
 kubectl create namespace cvmfs
