@@ -16,7 +16,7 @@ kubectl apply -f scratch/persistent-volume.yaml
 kubectl apply -f scratch/persistent-volume-claim.yaml
 
 ## Add cvmfs volumes
-helm install cvmfs-csi oci://registry.cern.ch/kubernetes/charts/cvmfs-csi --values cvmfs/cvmfs-csi-custom-values.yaml
+helm upgrade --install cvmfs-csi oci://registry.cern.ch/kubernetes/charts/cvmfs-csi --values cvmfs/cvmfs-csi-custom-values.yaml
 kubectl apply -f cvmfs/volume-pv-pvc.yaml
 
 ## Add JupyterHub 

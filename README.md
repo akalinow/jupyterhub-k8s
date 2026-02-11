@@ -7,12 +7,9 @@ K8S configuration of jupyterhub for Faculty of Physics, University of Warsaw.
 ```bash
 git clone https://github.com/akalinow/jupyterhub-k8s.git
 cd jupyterhub-k8s
-
-git submodule add https://github.com/akalinow/osg-k8s-cvmfs.git
-git submodule update --init --recursive
 ```
 
-SDet the TLS certificate and key. Use the pkcs1 format for the key, as the pkcs8 format is not supported by jupyterhub:
+Set the TLS certificate and key. Use the pkcs1 format for the key, as the pkcs8 format is not supported by jupyterhub:
 
 ```bash
 openssl pkcs8 -topk8 -inform PEM -outform PEM -in key.pem -out key_pkcs1.pem -nocrypt
@@ -30,6 +27,8 @@ Deploy the cluster:
 ```bash
 ./deploy.sh
 ```
+
+Access the JupyterHub instance at https://localhost:8443 and log in with your UW Google account. 
 
 Deploy updates:
 
