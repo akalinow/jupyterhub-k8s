@@ -4,3 +4,4 @@ metadata:
   name: scratch-local
 provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: Immediate
+---

@@ -9,22 +9,30 @@ spec:
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
   hostPath:
-    path: /scratch
-    type: Directory
+    path: /scratch/jupyterhub
+    type: DirectoryOrCreate
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: Immediate
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: cmsse-nfs-pv
 spec:
+  storageClassName: nfs
   capacity:
     storage: 1Ti
   accessModes:
-    - ReadWriteMany
+    - ReadOnlyMany
   volumeMode: Filesystem
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: nfs-storage
   nfs:
     server: 10.4.5.4
     path: /export/cms

@@ -79,18 +79,7 @@ hub:
             nvidia.com/gpu: "1"
 #######################################################
 #######################################################
-singleuser:
-  initContainers:
-    - name: create-user-scratch
-      image: busybox
-      command: ["sh", "-c", "mkdir -p /scratch/$JUPYTERHUB_USER && chown 1000:1000 /scratch/$JUPYTERHUB_USER"]
-      env:
-        - name: JUPYTERHUB_USER
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.labels['hub.jupyter.org/username']
-
-  # Default image (used if user doesn't select)
+singleuser: 
   image:
     name: akalinow/tensorflow-gpu
     tag: latest  
@@ -102,56 +91,31 @@ singleuser:
     limit: 8G
     guarantee: 1G
   storage:
-    type: dynamic
-    dynamic:
-      storageClass: scratch-local
-      pvcNameTemplate: scratch-local-{username}
-      volumeNameTemplate: volume-{username}
-      storageAccessModes:
-        - ReadWriteOnce
-    homeMountPath: /home/jovyan
     extraVolumes:
-      01-cvmfs-cms:
-        name: cvmfs-cms
+      01-cvmfs:
+        name: cvmfs
         persistentVolumeClaim:
-          claimName: cvmfs-cern-cms
-      02-cvmfs-sft:
-        name: cvmfs-sft
-        persistentVolumeClaim:
-          claimName: cvmfs-cern-sft
-      03-cvmfs-grid:
-        name: cvmfs-grid
-        persistentVolumeClaim:
-          claimName: cvmfs-cern-grid    
-      04-cvmfs-cms-opendata:
-        name: cvmfs-cms-opendata
-        persistentVolumeClaim:
-          claimName: cvmfs-cern-opendata-conddb
-      05-cmsse:
+          claimName: cvmfs-pvc
+      02-cmsse:
         name: cmsse-nfs
         persistentVolumeClaim:
           claimName: cmsse-nfs-pvc
+      03-scratch:
+        name: scratch-local
+        persistentVolumeClaim:
+          claimName: scratch-local-pvc
     extraVolumeMounts:
-      01-cvmfs-cms:
-        name: cvmfs-cms
-        mountPath: /cvmfs/cms.cern.ch
+      01-cvmfs:
+        name: cvmfs
+        mountPath: /cvmfs
         readOnly: true
-      02-cvmfs-sft:
-        name: cvmfs-sft
-        mountPath: /cvmfs/sft.cern.ch
-        readOnly: true
-      03-cvmfs-grid:
-        name: cvmfs-cern-grid
-        mountPath: /cvmfs/grid.cern.ch
-        readOnly: true
-      04-cvmfs-cms-opendata:
-        name: cvmfs-cern-opendata-conddb
-        mountPath: /cvmfs/cms-opendata-conddb.cern.ch
-        readOnly: true
-      05-cmsse:
+      02-cmsse:
         name: cmsse-nfs
         mountPath: /scratch_cmsse
         readOnly: true
+      03-scratch-local:
+        name: scratch-local
+        mountPath: /scratch
 
 
 #######################################################

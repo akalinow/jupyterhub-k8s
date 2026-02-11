@@ -1,0 +1,22 @@
+# Custom values for CVMFS CSI Helm chart
+
+# Sets CVMFS_HTTP_PROXY in default.local.
+cmvfsHttpProxy: "http://ca-proxy.cern.ch:3128"
+
+# Cache configuration for storing CVMFS client data.
+cache:
+  local:
+    location: /cvmfs-localcache
+    volumeSpec:
+      hostPath:
+        path: /var/lib/cvmfs.csi.cern.ch/cache
+        type: DirectoryOrCreate
+    # Maximum size of local cache in MiB.
+    # CVMFS client will garbage collect the exceeding amount.
+    cvmfsQuotaLimit: 20000
+  alien:
+    enabled: false
+    location: /cvmfs-aliencache
+    volumeSpec:
+      persistentVolumeClaim:
+        claimName: cvmfs-alien-cache
