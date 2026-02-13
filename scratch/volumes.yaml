@@ -1,3 +1,10 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: scratch-local
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: Immediate
+---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -8,10 +15,22 @@ spec:
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: ""
+  storageClassName: scratch-local
   hostPath:
     path: /scratch/jupyterhub
     type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: scratch-local-pvc
+spec:
+  storageClassName: scratch-local
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
 ---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -35,4 +54,16 @@ spec:
   nfs:
     server: 10.4.5.4
     path: /export/cms
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cmsse-nfs-pvc
+spec:
+  storageClassName: nfs
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 1Ti
 ---

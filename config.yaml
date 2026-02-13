@@ -39,6 +39,11 @@ hub:
         import os
         c.GoogleOAuthenticator.client_id = os.environ["OAUTH_CLIENT_ID"]
         c.GoogleOAuthenticator.client_secret = os.environ["OAUTH_CLIENT_SECRET"]
+      02-user-env.py: |
+        c.KubeSpawner.environment = {
+            "JUPYTERHUB_USER": "{username}",
+            "JUPYTERHUB_USER_ESCAPED": "{escaped_username}",
+        }
 
   config:
     Authenticator:
@@ -56,7 +61,7 @@ hub:
     #######################################
     JupyterHub:
         authenticator_class: google
-    
+
     KubeSpawner:
       # Pod resource limits and guarantees
       cpu_limit: 2
@@ -68,9 +73,11 @@ hub:
       # User-selectable image profiles
       profile_list:
         - display_name: "AI/ML"
-          description: "ML setup with TensorFlow and GPU support"
+          description: "ML setup with TensorFlow, PyTorch and GPU support"
           kubespawner_override:
-            image: quay.io/jupyter/tensorflow-notebook:cuda-latest
+            #image: quay.io/jupyter/tensorflow-notebook:cuda-latest
+            image: akalinow/tensorflow-gpu:TF2.20
+            #image_pull_policy: Always
             default: true
             cpu_limit: 8
             cpu_guarantee: 0.5
@@ -85,22 +92,20 @@ hub:
             cpu_guarantee: 0.5
             mem_limit: 64G
             mem_guarantee: 8G
+            cmd: 
+                - sh
+                - -c
+                - |
+                  echo "Prefetching cms.cern.ch";
 #######################################################
 #######################################################
 singleuser: 
   initContainers:
     - name: create-user-scratch
       image: busybox
-      command: ["sh", "-c", "mkdir -p /scratch/$JUPYTERHUB_USER && chown 1000:1000 /scratch/$JUPYTERHUB_USER"]
-      env:
-        - name: JUPYTERHUB_USER
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.labels['hub.jupyter.org/username']
-  image:
-    name: akalinow/tensorflow-gpu
-    tag: latest  
-  cmd: null
+      command: ["sh", "-c", "mkdir -p /scratch/$JUPYTERHUB_USER_ESCAPED && chown 1000:1000 /scratch/$JUPYTERHUB_USER_ESCAPED"]
+  cmd: 
+    - jupyterhub-singleuser
   cpu:
     limit: 2
     guarantee: 0.5
@@ -127,6 +132,7 @@ singleuser:
         name: cvmfs
         mountPath: /cvmfs
         readOnly: true
+        mountPropagation: HostToContainer
       02-cmsse:
         name: cmsse-nfs
         mountPath: /scratch_cmsse
