@@ -88,15 +88,11 @@ hub:
           description: "Centos9 image with CVMFS support for HEP software"
           kubespawner_override:
             image: gitlab-registry.cern.ch/akalinow/cmssw-docker/el9-cms:latest
+            image_pull_policy: Always
             cpu_limit: 8
             cpu_guarantee: 0.5
             mem_limit: 64G
             mem_guarantee: 8G
-            cmd: 
-                - sh
-                - -c
-                - |
-                  echo "Prefetching cms.cern.ch";
 #######################################################
 #######################################################
 singleuser: 
@@ -132,7 +128,7 @@ singleuser:
         name: cvmfs
         mountPath: /cvmfs
         readOnly: true
-        mountPropagation: HostToContainer
+        #mountPropagation: HostToContainer
       02-cmsse:
         name: cmsse-nfs
         mountPath: /scratch_cmsse

@@ -28,7 +28,7 @@ Deploy the cluster:
 ./deploy.sh
 ```
 
-Access the JupyterHub instance at https://localhost:8443 and log in with your UW Google account. 
+Access the JupyterHub instance at https://localhost:32443 and log in with your UW Google account. 
 
 Deploy updates:
 
