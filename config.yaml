@@ -107,6 +107,9 @@ hub:
               cp -rL /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/share/jupyter/kernels/* $KERNEL_DIR/
               cp -rL /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/etc/notebook/kernels/* $KERNEL_DIR/
 
+              # Link tutorials to user home
+              ln -s /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/share/jupyter/tutorials $HOME/tutorials
+
               #Remove R kernel which does not work in this setup
               rm -rf $KERNEL_DIR/ir
 
@@ -158,7 +161,6 @@ hub:
               }
               EOF
 
-  
 
               cat << EOF > $HOME/.bashrc
               export PS1="\[\033[1;30m\]\t\[\033[1;34m\] hepuser \[\033[0m\]$ "
@@ -192,6 +194,16 @@ hub:
             mem_limit: 32G
             mem_guarantee: 8G
             nvidia.com/gpu: "1"
+            lifecycle_hooks:
+              postStart:
+                  exec:
+                    command:
+                      - /bin/bash
+                      - -c
+                      - |    
+                        # Remove kennels installed by LCG
+                        KERNEL_DIR=$HOME/.local/share/jupyter/kernels
+                        rm -rf $KERNEL_DIR/*
 #######################################################
 #######################################################
 singleuser: 
