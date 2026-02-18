@@ -21,6 +21,7 @@ proxy:
     type: NodePort
     nodePorts:
       https: 32443
+
 hub:    
   extraEnv:
     OAUTH_CLIENT_ID:
@@ -42,7 +43,7 @@ hub:
       02-user-env.py: |
         c.KubeSpawner.environment = {
             "JUPYTERHUB_USER": "{username}",
-            "JUPYTERHUB_USER_ESCAPED": "{escaped_username}",
+            "JUPYTERHUB_USER_ESCAPED": "{escaped_username}"
         }
 
   config:
@@ -69,37 +70,140 @@ hub:
       mem_limit: 8G
       mem_guarantee: 1G
       
+      # Increase spawn timeout for slow initialization (LCG setup, etc.)
+      http_timeout: 120
+      start_timeout: 120
+      
       ################################################
       # User-selectable image profiles
-      profile_list:
+      profile_list:   
+        - display_name: "HEP"
+          description: "Centos9 with CVMFS support for HEP software"
+          kubespawner_override:
+            image: gitlab-registry.cern.ch/akalinow/cmssw-docker/el9-cms:latest
+            #image_pull_policy: Always
+            default: true
+            cpu_limit: 8
+            cpu_guarantee: 0.5
+            mem_limit: 64G
+            mem_guarantee: 8G
+            environment:
+              LCG_VERSION: "LCG_105"
+              LCG_ARCH: x86_64-el9-gcc12-opt
+            cmd:
+            - /bin/bash
+            - -lc
+            - |
+              #Create Jupyter kernel for PyROOT with LCG environment
+              KERNEL_DIR=$HOME/.local/share/jupyter/kernels
+              mkdir -p $KERNEL_DIR
+              #Copy kernels
+              #cp -rL /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/etc/notebook/kernels/* $KERNEL_DIR/
+              cp -rL /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/share/jupyter/kernels/* $KERNEL_DIR/
+              cp -rL /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/etc/notebook/kernels/* $KERNEL_DIR/
+
+              #Fix the PyROOT kernel to source the LCG environment before starting the kernel
+              mv $KERNEL_DIR/root $KERNEL_DIR/root_cpp
+
+              cat > $KERNEL_DIR/python3/kernel.json << EOF
+              {
+                "argv": [
+                  "/bin/bash",
+                  "-l",
+                  "-c",
+                  "source /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/setup.sh && exec python -m ipykernel_launcher -f {connection_file}"
+                ],
+                "display_name": "Python (${LCG_VERSION})",
+                "language": "python",
+                "env": {
+                  "PYTHONNOUSERSITE": "1",
+                  "LC_ALL": "C",
+                  "LANG": "C"
+                },
+                "metadata": {
+                  "debugger": true
+                }
+              }
+              EOF
+
+              #Fix ROOT C++ kernel to source the LCG environment before starting the kernel
+              cat > $KERNEL_DIR/root_cpp/kernel.json << EOF
+              {
+                "argv": [
+                  "/bin/bash",
+                  "-l",
+                  "-c",
+                  "source /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/setup.sh && exec python3.12 -m ipykernel_launcher -f {connection_file}"
+                ],
+                "display_name": "C++ (${LCG_VERSION})",
+                "language": "cpp",
+                "env": {
+                  "PYTHONNOUSERSITE": "1",
+                  "LC_ALL": "C",
+                  "LANG": "C"
+                },
+                "metadata": {
+                  "debugger": true
+                }
+              }
+              EOF
+
+              cat << EOF > $HOME/.jupyter/jupyter_notebook_config.py
+              c = get_config()
+              c.ServerApp.terminado_settings = { "shell_command": ["/bin/bash", "-l"]}
+              c.ContentsManager.show_hidden = True
+              try:
+                  from jupyterlab.filebrowser import FileBrowserManager
+                  c.FileBrowserManager.show_hidden = True
+              except ImportError:
+                  pass
+              try:
+                from notebook.services.config import ConfigManager
+                cm = ConfigManager()
+                cm.update('notebook', {
+                  'CodeCell': {
+                    'cm_config': {'lineNumbers': True}
+                              }
+                    })
+                except Exception:
+                  pass
+              EOF
+
+              cat << EOF > $HOME/.bashrc
+              export PS1="\[\033[1;30m\]\t\[\033[1;34m\] hepuser \[\033[0m\]$ "
+              # LCG environment setup function
+              lcg() { source /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/setup.sh; }
+              EOF
+
+              #Start JupyterHub singleuser process
+              exec jupyterhub-singleuser
+          
+            lifecycle_hooks:
+              postStart:
+                exec:
+                  command:
+                    - /bin/bash
+                    - -c
+                    - |    
+                      mkdir -p $HOME/.jupyter
+
+
+
+
         - display_name: "AI/ML"
-          description: "ML setup with TensorFlow, PyTorch and GPU support"
+          description: "Ubuntu with TensorFlow, PyTorch and GPU support"
           kubespawner_override:
             #image: quay.io/jupyter/tensorflow-notebook:cuda-latest
             image: akalinow/tensorflow-gpu:TF2.20
             #image_pull_policy: Always
-            default: true
             cpu_limit: 8
             cpu_guarantee: 0.5
             mem_limit: 32G
             mem_guarantee: 8G
             nvidia.com/gpu: "1"
-        - display_name: "Centos9 with CVMFS"
-          description: "Centos9 image with CVMFS support for HEP software"
-          kubespawner_override:
-            image: gitlab-registry.cern.ch/akalinow/cmssw-docker/el9-cms:latest
-            image_pull_policy: Always
-            cpu_limit: 8
-            cpu_guarantee: 0.5
-            mem_limit: 64G
-            mem_guarantee: 8G
 #######################################################
 #######################################################
 singleuser: 
-  initContainers:
-    - name: create-user-scratch
-      image: busybox
-      command: ["sh", "-c", "mkdir -p /scratch/$JUPYTERHUB_USER_ESCAPED && chown 1000:1000 /scratch/$JUPYTERHUB_USER_ESCAPED"]
   cmd: 
     - jupyterhub-singleuser
   cpu:
@@ -128,7 +232,7 @@ singleuser:
         name: cvmfs
         mountPath: /cvmfs
         readOnly: true
-        #mountPropagation: HostToContainer
+        mountPropagation: HostToContainer
       02-cmsse:
         name: cmsse-nfs
         mountPath: /scratch_cmsse

@@ -2,3 +2,16 @@ repositories:
   - cms.cern.ch
   - sft.cern.ch
   - grid.cern.ch
+
+prefetcher:
+  enabled: true
+  jobs:
+    cat_readme:
+      command: 'cat /cvmfs/sft.cern.ch/README.md'
+#      user: 'root'
+#      minute: '*'
+#      hour: '*'
+#      day: '*'
+#      month: '*'
+      weekday: '6'
+
