@@ -45,7 +45,6 @@ hub:
             "JUPYTERHUB_USER": "{username}",
             "JUPYTERHUB_USER_ESCAPED": "{escaped_username}"
         }
-
   config:
     Authenticator:
       admin_users:
@@ -62,6 +61,11 @@ hub:
     #######################################
     JupyterHub:
         authenticator_class: google
+        extra_config: |
+           c.ServerApp.terminado_settings = {
+            "shell_command": ["/bin/bash", ""]
+            }
+           c.ContentsManager.allow_hidden = True
 
     KubeSpawner:
       # Pod resource limits and guarantees
@@ -88,6 +92,7 @@ hub:
             mem_limit: 64G
             mem_guarantee: 8G
             environment:
+              PS1: "\\[\\033[1;30m\\]\\t\\[\\033[1;34m\\] hepuser \\[\\033[0m\\]$ "
               LCG_VERSION: "LCG_105"
               LCG_ARCH: x86_64-el9-gcc12-opt
             cmd:
@@ -102,7 +107,11 @@ hub:
               cp -rL /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/share/jupyter/kernels/* $KERNEL_DIR/
               cp -rL /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/etc/notebook/kernels/* $KERNEL_DIR/
 
+              #Remove R kernel which does not work in this setup
+              rm -rf $KERNEL_DIR/ir
+
               #Fix the PyROOT kernel to source the LCG environment before starting the kernel
+              rm -rf $KERNEL_DIR/root_cpp
               mv $KERNEL_DIR/root $KERNEL_DIR/root_cpp
 
               cat > $KERNEL_DIR/python3/kernel.json << EOF
@@ -133,41 +142,23 @@ hub:
                   "/bin/bash",
                   "-l",
                   "-c",
-                  "source /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/setup.sh && exec python3.12 -m ipykernel_launcher -f {connection_file}"
+                  "source /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/setup.sh && exec python3 -m JupyROOT.kernel.rootkernel -f {connection_file}"
                 ],
                 "display_name": "C++ (${LCG_VERSION})",
-                "language": "cpp",
-                "env": {
-                  "PYTHONNOUSERSITE": "1",
-                  "LC_ALL": "C",
-                  "LANG": "C"
-                },
-                "metadata": {
-                  "debugger": true
-                }
+                "language": "cpp"
               }
               EOF
 
-              cat << EOF > $HOME/.jupyter/jupyter_notebook_config.py
-              c = get_config()
-              c.ServerApp.terminado_settings = { "shell_command": ["/bin/bash", "-l"]}
-              c.ContentsManager.show_hidden = True
-              try:
-                  from jupyterlab.filebrowser import FileBrowserManager
-                  c.FileBrowserManager.show_hidden = True
-              except ImportError:
-                  pass
-              try:
-                from notebook.services.config import ConfigManager
-                cm = ConfigManager()
-                cm.update('notebook', {
-                  'CodeCell': {
-                    'cm_config': {'lineNumbers': True}
-                              }
-                    })
-                except Exception:
-                  pass
+              mkdir -p  /home/jovyan/.jupyter/lab/user-settings/@jupyterlab/filebrowser-extension/
+              cat << EOF > /home/jovyan/.jupyter/lab/user-settings/@jupyterlab/notebook-extension/tracker.jupyterlab-settings
+              {
+                  "codeCellConfig": {
+                      "lineNumbers": true
+                  }
+              }
               EOF
+
+  
 
               cat << EOF > $HOME/.bashrc
               export PS1="\[\033[1;30m\]\t\[\033[1;34m\] hepuser \[\033[0m\]$ "
