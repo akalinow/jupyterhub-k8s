@@ -40,6 +40,7 @@ hub:
         import os
         c.GoogleOAuthenticator.client_id = os.environ["OAUTH_CLIENT_ID"]
         c.GoogleOAuthenticator.client_secret = os.environ["OAUTH_CLIENT_SECRET"]
+        c.Authenticator.allow_all = True
       02-user-env.py: |
         c.KubeSpawner.environment = {
             "JUPYTERHUB_USER": "{username}",
@@ -48,9 +49,9 @@ hub:
   config:
     Authenticator:
       admin_users:
-        - akalinow
-      allowed_users:
         - a.kalinowski2@uw.edu.pl
+    #  allowed_users: 
+    #    - a.kalinowski2@uw.edu.pl
     GoogleOAuthenticator:
       oauth_callback_url: https://hepzc62.hep.fuw.edu.pl:32443/hub/oauth_callback
       hosted_domain:
@@ -61,11 +62,6 @@ hub:
     #######################################
     JupyterHub:
         authenticator_class: google
-        extra_config: |
-           c.ServerApp.terminado_settings = {
-            "shell_command": ["/bin/bash", ""]
-            }
-           c.ContentsManager.allow_hidden = True
 
     KubeSpawner:
       # Pod resource limits and guarantees
@@ -89,12 +85,19 @@ hub:
             default: true
             cpu_limit: 8
             cpu_guarantee: 0.5
-            mem_limit: 64G
+            mem_limit: 32G
             mem_guarantee: 8G
-            environment:
-              PS1: "\\[\\033[1;30m\\]\\t\\[\\033[1;34m\\] hepuser \\[\\033[0m\\]$ "
-              LCG_VERSION: "LCG_105"
-              LCG_ARCH: x86_64-el9-gcc12-opt
+            env:
+              LCG_VERSION:
+                valueFrom:
+                  configMapKeyRef:
+                    name: configs
+                    key: LCG_VERSION
+              LCG_ARCH:
+                valueFrom:
+                  configMapKeyRef:
+                    name: configs
+                    key: LCG_ARCH
             cmd:
             - /bin/bash
             - -lc
@@ -103,7 +106,6 @@ hub:
               KERNEL_DIR=$HOME/.local/share/jupyter/kernels
               mkdir -p $KERNEL_DIR
               #Copy kernels
-              #cp -rL /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/etc/notebook/kernels/* $KERNEL_DIR/
               cp -rL /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/share/jupyter/kernels/* $KERNEL_DIR/
               cp -rL /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/etc/notebook/kernels/* $KERNEL_DIR/
 
@@ -149,7 +151,7 @@ hub:
                 ],
                 "display_name": "C++ (${LCG_VERSION})",
                 "language": "cpp"
-              }
+              } 
               EOF
 
               mkdir -p  /home/jovyan/.jupyter/lab/user-settings/@jupyterlab/filebrowser-extension/
@@ -161,13 +163,16 @@ hub:
               }
               EOF
 
-
-              cat << EOF > $HOME/.bashrc
+              chmod 644 /etc/profile.d/bashrc.sh
+              cat << EOF > /etc/profile.d/bashrc.sh
               export PS1="\[\033[1;30m\]\t\[\033[1;34m\] hepuser \[\033[0m\]$ "
-              # LCG environment setup function
+              # environment setup functions
               lcg() { source /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/setup.sh; }
+              ilc() { source /cvmfs/ilc.desy.de/initILCSOFT.sh v01-10; }
+              dune() { echo "DUNE software environment is not available in this image."; }
+              sk() { echo "SK software environment is not available in this image."; }
               EOF
-
+              
               #Start JupyterHub singleuser process
               exec jupyterhub-singleuser
           
