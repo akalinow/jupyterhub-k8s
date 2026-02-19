@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cvmfs-test
+spec:
+  containers:
+    - name: cvmfs-test
+      image: busybox
+      imagePullPolicy: IfNotPresent
+      command: [ "/bin/sh", "-c", "trap : TERM INT; (while true; do sleep 1000; done) & wait" ]
+      env:
+        - name: PS1
+          value: "\\[\\033[1;30m\\]\\t\\[\\033[1;34m\\] hepuser \\[\\033[0m\\]$ "
+        - name: LCG_VERSION
+          value: "$LCG_VERSION"
+        - name: LCG_ARCH
+          value: "$LCG_ARCH"
+      volumeMounts:
+        - name: cvmfs
+          mountPath: /cvmfs
+          # CVMFS automount volumes must be mounted with HostToContainer mount propagation.
+          mountPropagation: HostToContainer
+  volumes:
+    - name: cvmfs
+      persistentVolumeClaim:
+        claimName: cvmfs-pvc
+
+
