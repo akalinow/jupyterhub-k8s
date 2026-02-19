@@ -13,7 +13,11 @@ kubectl create secret tls tls-secret --cert=cert.pem --key=key_pkcs1.pem
 ## add OAuth secret
 . oauth_secret.sh
 
-## Minikube will expose services via NodePort
+#Set LCG versions to be used
+export LCG_VERSION=LCG_105
+export LCG_ARCH=x86_64-el9-gcc12-opt
+
+kubectl create configmap configs --from-literal=LCG_VERSION=$LCG_VERSION --from-literal=LCG_ARCH=$LCG_ARCH
 
 ## Add scratch volume from bare-metal storage
 minikube mount /scratch:/scratch &
@@ -26,11 +30,13 @@ helm upgrade --cleanup-on-fail \
       --install sciencebox sciencebox/cvmfs \
       --namespace default \
       --create-namespace \
-      --values cvmfs/config.yaml
+      --values cvmfs/config.yaml 
 kubectl apply -f cvmfs/volumes.yaml
 
-#kubectl apply -f cvmfs/test-pod.yaml
-#kubectl exec -it cvmfs-test -- sh
+#Prefetch some cvmfs directories
+kubectl apply -f cvmfs/test-pod.yaml
+kubectl cp cvmfs/fetch_cvmfs.sh cvmfs-test:/tmp/fetch_cvmfs.sh
+kubectl exec cvmfs-test -- sh /tmp/fetch_cvmfs.sh
 
 ## Add JupyterHub 
 helm upgrade --cleanup-on-fail \

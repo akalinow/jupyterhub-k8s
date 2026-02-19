@@ -5,16 +5,20 @@ metadata:
 spec:
   containers:
     - name: cvmfs-test
-      image: busybox
+      image: gitlab-registry.cern.ch/akalinow/cmssw-docker/el9-cms:latest
       imagePullPolicy: IfNotPresent
       command: [ "/bin/sh", "-c", "trap : TERM INT; (while true; do sleep 1000; done) & wait" ]
       env:
-        - name: PS1
-          value: "\\[\\033[1;30m\\]\\t\\[\\033[1;34m\\] hepuser \\[\\033[0m\\]$ "
         - name: LCG_VERSION
-          value: "$LCG_VERSION"
+          valueFrom:
+            configMapKeyRef:
+              name: configs
+              key: LCG_VERSION
         - name: LCG_ARCH
-          value: "$LCG_ARCH"
+          valueFrom:
+            configMapKeyRef:
+              name: configs
+              key: LCG_ARCH
       volumeMounts:
         - name: cvmfs
           mountPath: /cvmfs

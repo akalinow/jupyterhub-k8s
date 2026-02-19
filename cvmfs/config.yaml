@@ -1,12 +1,10 @@
-
-
 repositories:
   - cms.cern.ch
   - sft.cern.ch
   - grid.cern.ch
   - ilc.desy.de
   - nova.opensciencegrid.org
-  
+
 
 prefetcher:
   enabled: true
