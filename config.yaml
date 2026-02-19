@@ -163,9 +163,8 @@ hub:
               }
               EOF
 
-              chmod 644 /etc/profile.d/bashrc.sh
-              cat << EOF > /etc/profile.d/bashrc.sh
-              export PS1="\[\033[1;30m\]\t\[\033[1;34m\] hepuser \[\033[0m\]$ "
+              cat << EOF > $HOME/.bashrc
+              export PS1='[\t] \e[91mhepuser\e[0m '
               # environment setup functions
               lcg() { source /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/setup.sh; }
               ilc() { source /cvmfs/ilc.desy.de/initILCSOFT.sh v01-10; }

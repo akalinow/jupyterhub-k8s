@@ -33,8 +33,12 @@ helm upgrade --cleanup-on-fail \
       --values cvmfs/config.yaml 
 kubectl apply -f cvmfs/volumes.yaml
 
+# Add DESY ILC repository configuration
+kubectl patch configmap sciencebox-cvmfs-cfgmap-config-d --patch-file cvmfs/ilc.desy.de.yaml
+
 #Prefetch some cvmfs directories
 kubectl apply -f cvmfs/test-pod.yaml
+kubectl wait --for=condition=ready pod/cvmfs-test --timeout=300s
 kubectl cp cvmfs/fetch_cvmfs.sh cvmfs-test:/tmp/fetch_cvmfs.sh
 kubectl exec cvmfs-test -- sh /tmp/fetch_cvmfs.sh
 
@@ -44,4 +48,5 @@ helm upgrade --cleanup-on-fail \
   --namespace default \
   --create-namespace \
   --version=4.3.2 \
+  --timeout=600s \
   --values config.yaml

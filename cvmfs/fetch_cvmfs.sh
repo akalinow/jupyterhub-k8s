@@ -1,6 +1,7 @@
 #!/bin/sh
 #run ls command on a list of directories to trigger cvmfs fetch of files in those directories
 
+ls -l /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/setup.sh
 source /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/setup.sh
 
 # Define list of directories (POSIX compatible - space-separated)
