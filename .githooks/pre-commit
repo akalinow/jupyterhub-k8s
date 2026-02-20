@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Block commits that modify template secrets/user lists.
 blocked_files=(
-  "oauth_secret.sh"
+  "scripts/oauth_secret.sh"
   "data/users.json"
 )
 

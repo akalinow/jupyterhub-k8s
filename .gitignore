@@ -2,8 +2,7 @@
 *.pem
 
 # ignore secret files
-<<<<<<< HEAD
 oauth_secret.sh
-=======
-oauth-secret.sh
->>>>>>> 719d453 (* first import)
+users.json
+
+
