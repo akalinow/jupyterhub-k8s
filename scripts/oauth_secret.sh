@@ -1,4 +1,3 @@
-# Template only. Do not commit real secrets here. AAA
 OAUTH_CLIENT_ID=XXX.apps.googleusercontent.com
 OAUTH_CLIENT_SECRET=YYY
 OAUTH_CALLBACK_URL=ZZZ:32443/hub/oauth_callback

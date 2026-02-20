@@ -7,14 +7,17 @@ KUBERNETES_VERSION='v1.34.0'
 minikube start --driver=$MINIKUBE_DRIVER --kubernetes-version=$KUBERNETES_VERSION \
 --container-runtime=docker --gpus all
 
+## Setup network forwarding for external access
+./scripts/setup_network.sh
+
 ## Create TLS secret
 kubectl create secret tls tls-secret --cert=cert.pem --key=key_pkcs1.pem 
 
 ## Add OAuth secret
-./oauth_secret.sh
+./scripts/oauth_secret.sh
 
 ## Add allowed users secret
-./users_secret.sh assets/users.json
+./scripts/users_secret.sh assets/users.json
 
 ## Add custom spawn page
 kubectl create configmap jupyterhub-templates --from-file=assets/spawn.html 
@@ -57,3 +60,4 @@ helm upgrade --cleanup-on-fail \
   --version=4.3.2 \
   --timeout=600s \
   --values config.yaml
+

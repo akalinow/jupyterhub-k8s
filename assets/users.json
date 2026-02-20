@@ -1,9 +1,8 @@
-# Template only. Do not commit real secrets here.
 {
-    "admin": "admin@uw.edu.pl",
+    "admin": "a.kalinowski2@uw.edu.pl",
     "users": [
-        "admin@uw.edu.pl",
-        "user1@uw.edu.pl",
-        "user2@student.uw.edu.pl"
+        "a.kalinowski2@uw.edu.pl",
+        "kj.grzelak@uw.edu.pl",
+        "s.slawinski@student.uw.edu.pl"
     ]
 }
