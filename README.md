@@ -1,5 +1,7 @@
 # jupyterhub-k8s
 K8S configuration of jupyterhub for Faculty of Physics, University of Warsaw. 
+Configuration has access to cvmfs repositories, listed in [cvmfs/config.yaml](cvmfs/config.yaml), and allows spawning user pods on both cpu and gpu nodes. 
+Authentication is done via Google OAuth, with allowed users listed in a secret.
 
 
 ## Installation
@@ -14,13 +16,7 @@ Set the TLS certificate and key. Use the pkcs1 format for the key, as the pkcs8 
 ```bash
 openssl pkcs8 -topk8 -inform PEM -outform PEM -in key.pem -out key_pkcs1.pem -nocrypt
 ```
-Fill OAuth values in `oauth_secret.sh` and create the secret:
-
-
-```bash
-./oauth_secret.sh
-```
-
+Fill OAuth values in `oauth_secret.sh`
 Add users to `data/users.json`:
 
 ```bash
@@ -33,13 +29,6 @@ Add users to `data/users.json`:
     ]
 }
 ``` 
-
-Add users list to secret:
-
-```bash
-users_secret.sh data/users.json
-```
-
 Deploy the cluster:
 
 ```bash
