@@ -38,6 +38,7 @@ kubectl patch configmap sciencebox-cvmfs-cfgmap-config-d --patch-file cvmfs/ilc.
 
 #Prefetch some cvmfs directories
 kubectl apply -f cvmfs/test-pod.yaml
+printf "\033[1;36mWaiting for cvmfs-test pod to be ready...\033[0m\n"
 kubectl wait --for=condition=ready pod/cvmfs-test --timeout=300s
 kubectl cp cvmfs/fetch_cvmfs.sh cvmfs-test:/tmp/fetch_cvmfs.sh
 kubectl exec cvmfs-test -- sh /tmp/fetch_cvmfs.sh

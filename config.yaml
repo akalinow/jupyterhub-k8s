@@ -34,26 +34,48 @@ hub:
         secretKeyRef:
           name: google-oauth-secret
           key: client-secret
-
+    OAUTH_CALLBACK_URL:
+      valueFrom:
+        secretKeyRef:
+          name: google-oauth-secret
+          key: oauth-callback-url
+    ALLOWED_USERS_JSON:
+      valueFrom:
+        secretKeyRef:
+          name: allowed_users
+          key: users
+    ADMIN_USER:
+      valueFrom:
+        secretKeyRef:
+          name: allowed_users
+          key: admin
   extraConfig:
       01-google-oauth.py: |
         import os
         c.GoogleOAuthenticator.client_id = os.environ["OAUTH_CLIENT_ID"]
         c.GoogleOAuthenticator.client_secret = os.environ["OAUTH_CLIENT_SECRET"]
+        c.GoogleOAuthenticator.oauth_callback_url = os.environ["OAUTH_CALLBACK_URL"]
         c.Authenticator.allow_all = True
+      03-allowed-users.py: |
+        import json
+        import os
+
+        raw_users = os.environ.get("ALLOWED_USERS_JSON", "[]")
+        allowed_users = set(json.loads(raw_users))
+        admin_user = os.environ.get("ADMIN_USER", "").strip()
+        if admin_user:
+          c.Authenticator.admin_users = {admin_user}
+        if allowed_users:
+          c.Authenticator.allow_all = False
+          c.Authenticator.allowed_users = allowed_users
       02-user-env.py: |
         c.KubeSpawner.environment = {
             "JUPYTERHUB_USER": "{username}",
             "JUPYTERHUB_USER_ESCAPED": "{escaped_username}"
         }
   config:
-    Authenticator:
-      admin_users:
-        - a.kalinowski2@uw.edu.pl
-    #  allowed_users: 
-    #    - a.kalinowski2@uw.edu.pl
+    Authenticator: {}
     GoogleOAuthenticator:
-      oauth_callback_url: https://hepzc62.hep.fuw.edu.pl:32443/hub/oauth_callback
       hosted_domain:
         - uw.edu.pl
         - student.uw.edu.pl

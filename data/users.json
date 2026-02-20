@@ -1,0 +1,9 @@
+# Template only. Do not commit real secrets here.
+{
+    "admin": "admin@uw.edu.pl",
+    "users": [
+        "admin@uw.edu.pl",
+        "user1@uw.edu.pl",
+        "user2@student.uw.edu.pl"
+    ]
+}

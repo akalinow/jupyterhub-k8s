@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Block commits that modify template secrets/user lists.
+blocked_files=(
+  "oauth_secret.sh"
+  "data/users.json"
+)
+
+for file in "${blocked_files[@]}"; do
+  if git diff --cached --name-only | grep -qx "$file"; then
+    echo "ERROR: $file is a template. Do not commit changes to it." >&2
+    echo "Use a local secrets/user file instead." >&2
+    exit 1
+  fi
+done
