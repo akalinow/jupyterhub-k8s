@@ -14,7 +14,10 @@ kubectl create secret tls tls-secret --cert=cert.pem --key=key_pkcs1.pem
 ./oauth_secret.sh
 
 ## Add allowed users secret
-./users_secret.sh data/users.json
+./users_secret.sh assets/users.json
+
+## Add custom spawn page
+kubectl create configmap jupyterhub-templates --from-file=assets/spawn.html 
 
 #Set LCG versions to be used
 export LCG_VERSION=LCG_105

@@ -23,6 +23,13 @@ proxy:
       https: 32443
 
 hub:    
+  extraVolumes:
+    - name: custom-templates
+      configMap:
+        name: jupyterhub-templates
+  extraVolumeMounts:
+      - name: custom-templates
+        mountPath: /usr/local/share/jupyterhub/custom_templates
   extraEnv:
     OAUTH_CLIENT_ID:
       valueFrom:
@@ -84,8 +91,10 @@ hub:
     #######################################
     JupyterHub:
         authenticator_class: google
-    template_vars:
-        announcement: "Welcome to the ZCiOF Cluster! Please shut down servers when finished to save resources."
+        template_paths: 
+          - "/usr/local/share/jupyterhub/custom_templates/"
+        template_vars:
+            announcement: "Please shut down servers when finished."
 
     KubeSpawner:
       # Pod resource limits and guarantees
@@ -262,6 +271,7 @@ hub:
 #######################################################
 #######################################################
 singleuser: 
+  startTimeout: 600
   cmd: 
     - jupyterhub-singleuser
   cpu:

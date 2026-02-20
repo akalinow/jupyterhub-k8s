@@ -1,0 +1,20 @@
+{% extends "page.html" %}
+
+{% block main %}
+<div class="container">
+  <div class="row text-center" style="margin-top: 20px;">
+    <h2>Welcome to the FUW ZCiOF Workspace</h2>
+    <p>Select your environment configuration below to start your server.</p>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 col-md-offset-3">
+      <form enctype="multipart/form-data" method="post" action="{{ url }}">
+        {{- spawner_options_form | safe -}}
+        <br>
+        <input type="submit" value="Start Server" class="btn btn-jupyter btn-lg btn-block">
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
