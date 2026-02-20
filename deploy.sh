@@ -10,8 +10,11 @@ minikube start --driver=$MINIKUBE_DRIVER --kubernetes-version=$KUBERNETES_VERSIO
 ## Create TLS secret
 kubectl create secret tls tls-secret --cert=cert.pem --key=key_pkcs1.pem 
 
-## add OAuth secret
-. oauth_secret.sh
+## Add OAuth secret
+./oauth_secret.sh
+
+## Add allowed users secret
+./users_secret.sh data/users.json
 
 #Set LCG versions to be used
 export LCG_VERSION=LCG_105

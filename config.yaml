@@ -42,12 +42,12 @@ hub:
     ALLOWED_USERS_JSON:
       valueFrom:
         secretKeyRef:
-          name: allowed_users
+          name: allowed-users
           key: users
     ADMIN_USER:
       valueFrom:
         secretKeyRef:
-          name: allowed_users
+          name: allowed-users
           key: admin
   extraConfig:
       01-google-oauth.py: |
@@ -84,6 +84,8 @@ hub:
     #######################################
     JupyterHub:
         authenticator_class: google
+    template_vars:
+        announcement: "Welcome to the ZCiOF Cluster! Please shut down servers when finished to save resources."
 
     KubeSpawner:
       # Pod resource limits and guarantees
@@ -185,14 +187,41 @@ hub:
               }
               EOF
 
-              cat << EOF > $HOME/.bashrc
+              cat << EOF > $HOME/.bash_profile
               export PS1='[\t] \e[91mhepuser\e[0m '
               # environment setup functions
               lcg() { source /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/setup.sh; }
               ilc() { source /cvmfs/ilc.desy.de/initILCSOFT.sh v01-10; }
               dune() { echo "DUNE software environment is not available in this image."; }
               sk() { echo "SK software environment is not available in this image."; }
+
+              echo -e "\e[31m      ▗▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▖"
+              echo -e "     ▟██████████████████████████████████████▙"
+              echo -e "    ▟█▀▀                                ▀▀█▙"
+              echo -e "   ▟█    \e[30m███████╗ ██████╗██╗ ██████╗ ███████╗\e[31m   █▙"
+              echo -e "  ▟█     \e[30m╚══███╔╝██╔════╝██║██╔═══██╗██╔════╝\e[31m    █▙"
+              echo -e " ▟█        \e[30m███╔╝ ██║     ██║██║   ██║█████╗\e[31m       █▙"
+              echo -e " ▜█       \e[30m███╔╝  ██║     ██║██║   ██║██╔══╝\e[31m       ▛█"
+              echo -e "  ▜█     \e[30m███████╗╚██████╗██║╚██████╔╝██║\e[31m         ▛█"
+              echo -e "   ▜█    \e[30m╚══════╝ ╚═════╝╚═╝ ╚═════╝ ╚═╝\e[31m        ▛█"
+              echo -e "    ▜█▄▄                                ▄▄█▛"
+              echo -e "     ▜██████████████████████████████████████▛"
+              echo -e "      ▝▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▘\e[0m"
+              echo ""
+              
+              if [[ -f /etc/os-release ]] && grep -Eq '^(ID|ID_LIKE)=.*(rhel|centos|almalinux|rocky)' /etc/os-release; \
+                 then
+                echo -e "\e[94mAvailable environment setup functions:\e[0m lcg, ilc"
+              fi
+              
               EOF
+
+              cat << EOF > $HOME/.jupyter/jupyter_server_config.py
+              c.ServerApp.terminado_settings = {
+                "shell_command": ["/bin/bash","-l","-i"]
+              }
+              EOF
+
               
               #Start JupyterHub singleuser process
               exec jupyterhub-singleuser

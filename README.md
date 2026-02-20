@@ -18,7 +18,7 @@ Fill OAuth values in `oauth_secret.sh` and create the secret:
 
 
 ```bash
-source oauth_secret.sh
+./oauth_secret.sh
 ```
 
 Add users to `data/users.json`:

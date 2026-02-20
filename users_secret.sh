@@ -22,7 +22,7 @@ USERS_TMP="$(mktemp)"
 trap 'rm -f "$USERS_TMP"' EXIT
 printf '%s' "$USERS_JSON" > "$USERS_TMP"
 
-kubectl create secret generic allowed_users \
+kubectl create secret generic allowed-users \
 	--from-file=users="$USERS_TMP" \
 	--from-literal=admin="$ADMIN_USER" \
 	--dry-run=client -o yaml | kubectl apply -f -
