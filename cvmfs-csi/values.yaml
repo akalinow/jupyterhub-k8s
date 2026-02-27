@@ -1,27 +1,18 @@
 # Helm values for cvmfs-contrib/cvmfs-csi chart.
 # Reference: https://github.com/cvmfs-contrib/cvmfs-csi
 
-# HTTP proxy for the CVMFS client running inside the CSI DaemonSet pods.
-# The chart default is http://ca-proxy.cern.ch:3128 (CERN-internal only).
-# Use DIRECT for a university environment, or your site's Squid proxy URL.
-cmvfsHttpProxy: "DIRECT"
-
-cache:
-  local:
-    # Host path where the per-node CVMFS client cache is stored.
-    location: /cvmfs-localcache
-    volumeSpec:
-      hostPath:
-        path: /var/lib/cvmfs.csi.cern.ch/cache
-        type: DirectoryOrCreate
-    # Maximum cache size per node in MiB (10 GiB).
-    cvmfsQuotaLimit: 10000
-
 # Extra ConfigMaps managed by the chart release.
-# cvmfs-csi-config-d is mounted at /etc/cvmfs/config.d/ inside every
-# CSI DaemonSet pod — the same directory CVMFS reads for per-repository
+# cvmfs-csi-default-local is mounted as /etc/cvmfs/default.local in the
+# CSI pods. We override CVMFS_HTTP_PROXY for non-CERN environments.
+# cvmfs-csi-config-d is mounted at /etc/cvmfs/config.d for repo-specific
 # configuration files and public keys.
 extraConfigMaps:
+  cvmfs-csi-default-local:
+    default.local: |
+      CVMFS_USE_GEOAPI=yes
+      CVMFS_HTTP_PROXY="DIRECT"
+      CVMFS_QUOTA_LIMIT={{ .Values.cache.local.cvmfsQuotaLimit }}
+      CVMFS_CACHE_BASE=/cvmfs-localcache
   cvmfs-csi-config-d:
     # DESY ILC repository — not shipped with the standard cvmfs-config package.
     # Stratum-1 servers and public key taken verbatim from cvmfs/ilc.desy.de.yaml.
@@ -38,3 +29,14 @@ extraConfigMaps:
       ugxcbkBGB3VfqSgfun8urekGEHx+vTNwu8rufBkAbQYdYCPBD3AGqSg+Kgi7i/gX
       cwIDAQAB
       -----END PUBLIC KEY-----
+
+cache:
+  local:
+    # Host path where the per-node CVMFS client cache is stored.
+    volumeSpec:
+      hostPath:
+        path: /var/lib/cvmfs.csi.cern.ch/cache
+        type: DirectoryOrCreate
+    # Maximum cache size per node in MiB (10 GiB).
+    cvmfsQuotaLimit: 10000
+

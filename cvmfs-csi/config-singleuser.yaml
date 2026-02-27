@@ -34,30 +34,35 @@ singleuser:
           driver: cvmfs.csi.cern.ch
           volumeAttributes:
             repository: cms.cern.ch
+            sharedMountID: cvmfs-cms.cern.ch
       02-cvmfs-sft:
         name: cvmfs-sft
         csi:
           driver: cvmfs.csi.cern.ch
           volumeAttributes:
             repository: sft.cern.ch
+            sharedMountID: cvmfs-sft.cern.ch
       03-cvmfs-grid:
         name: cvmfs-grid
         csi:
           driver: cvmfs.csi.cern.ch
           volumeAttributes:
             repository: grid.cern.ch
+            sharedMountID: cvmfs-grid.cern.ch
       04-cvmfs-ilc:
         name: cvmfs-ilc
         csi:
           driver: cvmfs.csi.cern.ch
           volumeAttributes:
             repository: ilc.desy.de
+            sharedMountID: cvmfs-ilc.desy.de
       05-cvmfs-nova:
         name: cvmfs-nova
         csi:
           driver: cvmfs.csi.cern.ch
           volumeAttributes:
             repository: nova.opensciencegrid.org
+            sharedMountID: cvmfs-nova.opensciencegrid.org
       # Unchanged volumes below.
       06-cmsse:
         name: cmsse-nfs

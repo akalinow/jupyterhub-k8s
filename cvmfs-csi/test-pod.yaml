@@ -8,17 +8,6 @@ spec:
       image: gitlab-registry.cern.ch/akalinow/cmssw-docker/el9-cms:latest
       imagePullPolicy: IfNotPresent
       command: [ "/bin/sh", "-c", "trap : TERM INT; (while true; do sleep 1000; done) & wait" ]
-      env:
-        - name: LCG_VERSION
-          valueFrom:
-            configMapKeyRef:
-              name: configs
-              key: LCG_VERSION
-        - name: LCG_ARCH
-          valueFrom:
-            configMapKeyRef:
-              name: configs
-              key: LCG_ARCH
       volumeMounts:
         # Each repository is mounted at its canonical /cvmfs/<repo> path.
         # No mountPropagation needed — the CSI driver handles FUSE internally.
