@@ -14,8 +14,6 @@ extraConfigMaps:
       CVMFS_QUOTA_LIMIT={{ .Values.cache.local.cvmfsQuotaLimit }}
       CVMFS_CACHE_BASE=/cvmfs-localcache
   cvmfs-csi-config-d:
-    # DESY ILC repository — not shipped with the standard cvmfs-config package.
-    # Stratum-1 servers and public key taken verbatim from cvmfs/ilc.desy.de.yaml.
     ilc.desy.de.conf: |
       CVMFS_SERVER_URL='http://grid-cvmfs-one.desy.de:8000/cvmfs/@fqrn@;http://cvmfs-stratum-one.cern.ch:8000/cvmfs/@fqrn@;http://cvmfs-egi.gridpp.rl.ac.uk:8000/cvmfs/@fqrn@'
       CVMFS_PUBLIC_KEY='/etc/cvmfs/config.d/ilc.desy.de.pub'
