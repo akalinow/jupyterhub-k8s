@@ -11,8 +11,14 @@ Setup includes:
 
 * [Docker](https://docs.docker.com/engine/install/ubuntu/)
 * [minikube](https://minikube.sigs.k8s.io/docs/start/)
+* [helm](https://helm.sh/docs/intro/install/)
+* [kubectrl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
 * [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker) (optional, for GPU support)
 
+Add admin user to Docker group to allow running docker commands without sudo:
+```Bash 
+bashsudo usermod -aG docker $USER
+```
 
 
 ## Installation
@@ -27,6 +33,7 @@ Note selfsigned certificate will generate a warning in the browser.
 Use the pkcs1 format for the key, as the pkcs8 format is not supported by jupyterhub:
 
 ```bash
+openssl req -x509 -nodes -newkey rsa:2048 -keyout key.pem -out cert.pem -days 99999
 openssl pkcs8 -topk8 -inform PEM -outform PEM -in key.pem -out key_pkcs1.pem -nocrypt
 ```
 Fill OAuth values in `oauth_secret.sh` and add users to `data/users.json`, then run the deployment script:
