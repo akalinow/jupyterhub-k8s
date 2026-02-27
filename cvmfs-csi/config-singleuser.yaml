@@ -1,0 +1,106 @@
+# This file is a REFERENCE only — not applied directly.
+#
+# When the CSI driver has been verified via cvmfs-csi/test-pod.yaml, replace
+# the singleuser.storage block in config.yaml with the content below.
+#
+# Changes vs the current block:
+#   - 01-cvmfs (single PVC, mountPropagation: HostToContainer) is replaced
+#     by five per-repository inline CSI volumes.
+#   - All other volumes (cmsse, scratch) are unchanged.
+#
+# To apply: copy the singleuser block below into config.yaml, replacing the
+# existing singleuser section (lines marked with ###).
+
+#######################################################
+#######################################################
+singleuser:
+  startTimeout: 600
+  cmd:
+    - jupyterhub-singleuser
+  cpu:
+    limit: 2
+    guarantee: 0.5
+  memory:
+    limit: 8G
+    guarantee: 1G
+  storage:
+    type: none
+    extraVolumes:
+      # CVMFS — per-repository CSI volumes (replaces the single cvmfs-pvc).
+      # No host CVMFS installation required; no mountPropagation needed.
+      01-cvmfs-cms:
+        name: cvmfs-cms
+        csi:
+          driver: cvmfs.csi.cern.ch
+          volumeAttributes:
+            repository: cms.cern.ch
+            sharedMountID: cvmfs-cms.cern.ch
+      02-cvmfs-sft:
+        name: cvmfs-sft
+        csi:
+          driver: cvmfs.csi.cern.ch
+          volumeAttributes:
+            repository: sft.cern.ch
+            sharedMountID: cvmfs-sft.cern.ch
+      03-cvmfs-grid:
+        name: cvmfs-grid
+        csi:
+          driver: cvmfs.csi.cern.ch
+          volumeAttributes:
+            repository: grid.cern.ch
+            sharedMountID: cvmfs-grid.cern.ch
+      04-cvmfs-ilc:
+        name: cvmfs-ilc
+        csi:
+          driver: cvmfs.csi.cern.ch
+          volumeAttributes:
+            repository: ilc.desy.de
+            sharedMountID: cvmfs-ilc.desy.de
+      05-cvmfs-nova:
+        name: cvmfs-nova
+        csi:
+          driver: cvmfs.csi.cern.ch
+          volumeAttributes:
+            repository: nova.opensciencegrid.org
+            sharedMountID: cvmfs-nova.opensciencegrid.org
+      # Unchanged volumes below.
+      06-cmsse:
+        name: cmsse-nfs
+        persistentVolumeClaim:
+          claimName: cmsse-nfs-pvc
+      07-scratch:
+        name: scratch-local
+        persistentVolumeClaim:
+          claimName: scratch-local-pvc
+    extraVolumeMounts:
+      01-cvmfs-cms:
+        name: cvmfs-cms
+        mountPath: /cvmfs/cms.cern.ch
+        readOnly: true
+      02-cvmfs-sft:
+        name: cvmfs-sft
+        mountPath: /cvmfs/sft.cern.ch
+        readOnly: true
+      03-cvmfs-grid:
+        name: cvmfs-grid
+        mountPath: /cvmfs/grid.cern.ch
+        readOnly: true
+      04-cvmfs-ilc:
+        name: cvmfs-ilc
+        mountPath: /cvmfs/ilc.desy.de
+        readOnly: true
+      05-cvmfs-nova:
+        name: cvmfs-nova
+        mountPath: /cvmfs/nova.opensciencegrid.org
+        readOnly: true
+      # Unchanged mounts below.
+      06-cmsse:
+        name: cmsse-nfs
+        mountPath: /scratch_cmsse
+        readOnly: true
+      07-scratch:
+        name: scratch-local
+        mountPath: /home/jovyan
+        subPathExpr: $(JUPYTERHUB_USER)
+#######################################################
+#######################################################

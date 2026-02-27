@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cvmfs-csi-test
+spec:
+  containers:
+    - name: cvmfs-csi-test
+      image: gitlab-registry.cern.ch/akalinow/cmssw-docker/el9-cms:latest
+      imagePullPolicy: IfNotPresent
+      command: [ "/bin/sh", "-c", "trap : TERM INT; (while true; do sleep 1000; done) & wait" ]
+      volumeMounts:
+        # Each repository is mounted at its canonical /cvmfs/<repo> path.
+        # No mountPropagation needed — the CSI driver handles FUSE internally.
+        - name: cvmfs-cms
+          mountPath: /cvmfs/cms.cern.ch
+          readOnly: true
+        - name: cvmfs-sft
+          mountPath: /cvmfs/sft.cern.ch
+          readOnly: true
+        - name: cvmfs-grid
+          mountPath: /cvmfs/grid.cern.ch
+          readOnly: true
+        - name: cvmfs-ilc
+          mountPath: /cvmfs/ilc.desy.de
+          readOnly: true
+        - name: cvmfs-nova
+          mountPath: /cvmfs/nova.opensciencegrid.org
+          readOnly: true
+  volumes:
+    - name: cvmfs-cms
+      csi:
+        driver: cvmfs.csi.cern.ch
+        volumeAttributes:
+          repository: cms.cern.ch
+    - name: cvmfs-sft
+      csi:
+        driver: cvmfs.csi.cern.ch
+        volumeAttributes:
+          repository: sft.cern.ch
+    - name: cvmfs-grid
+      csi:
+        driver: cvmfs.csi.cern.ch
+        volumeAttributes:
+          repository: grid.cern.ch
+    - name: cvmfs-ilc
+      csi:
+        driver: cvmfs.csi.cern.ch
+        volumeAttributes:
+          repository: ilc.desy.de
+    - name: cvmfs-nova
+      csi:
+        driver: cvmfs.csi.cern.ch
+        volumeAttributes:
+          repository: nova.opensciencegrid.org
