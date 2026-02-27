@@ -1,0 +1,40 @@
+# Helm values for cvmfs-contrib/cvmfs-csi chart.
+# Reference: https://github.com/cvmfs-contrib/cvmfs-csi
+
+# HTTP proxy for the CVMFS client running inside the CSI DaemonSet pods.
+# The chart default is http://ca-proxy.cern.ch:3128 (CERN-internal only).
+# Use DIRECT for a university environment, or your site's Squid proxy URL.
+cmvfsHttpProxy: "DIRECT"
+
+cache:
+  local:
+    # Host path where the per-node CVMFS client cache is stored.
+    location: /cvmfs-localcache
+    volumeSpec:
+      hostPath:
+        path: /var/lib/cvmfs.csi.cern.ch/cache
+        type: DirectoryOrCreate
+    # Maximum cache size per node in MiB (10 GiB).
+    cvmfsQuotaLimit: 10000
+
+# Extra ConfigMaps managed by the chart release.
+# cvmfs-csi-config-d is mounted at /etc/cvmfs/config.d/ inside every
+# CSI DaemonSet pod — the same directory CVMFS reads for per-repository
+# configuration files and public keys.
+extraConfigMaps:
+  cvmfs-csi-config-d:
+    # DESY ILC repository — not shipped with the standard cvmfs-config package.
+    # Stratum-1 servers and public key taken verbatim from cvmfs/ilc.desy.de.yaml.
+    ilc.desy.de.conf: |
+      CVMFS_SERVER_URL='http://grid-cvmfs-one.desy.de:8000/cvmfs/@fqrn@;http://cvmfs-stratum-one.cern.ch:8000/cvmfs/@fqrn@;http://cvmfs-egi.gridpp.rl.ac.uk:8000/cvmfs/@fqrn@'
+      CVMFS_PUBLIC_KEY='/etc/cvmfs/config.d/ilc.desy.de.pub'
+    ilc.desy.de.pub: |
+      -----BEGIN PUBLIC KEY-----
+      MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3pgrEIimdCPWG9cuhQ0d
+      ZWfYxvHRz5hL4HvQlmvikLIlHxs2EApnGyAWdaHAeQ4IiY+JXQnGsS8e5Gr2cZRb
+      Y6Ya19GrjMY1wv8fc+uU9kXp7TbHpl3mSQxERG4+wqosN3+IUaPHdnWGP11idOQB
+      I0HsJ7PTRk9quFjx1ppkVITZN07+OdGBIzLK6SyDjy49IfL6DVZUH/Oc99IiXg6E
+      NDN2UecnnjDEmcvQh2UjGSQ+0NHe36ttQKEnK58GvcSj2reUEaVKLRvPcrzT9o7c
+      ugxcbkBGB3VfqSgfun8urekGEHx+vTNwu8rufBkAbQYdYCPBD3AGqSg+Kgi7i/gX
+      cwIDAQAB
+      -----END PUBLIC KEY-----
