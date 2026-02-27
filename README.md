@@ -29,7 +29,7 @@ Use the pkcs1 format for the key, as the pkcs8 format is not supported by jupyte
 ```bash
 openssl pkcs8 -topk8 -inform PEM -outform PEM -in key.pem -out key_pkcs1.pem -nocrypt
 ```
-Fill OAuth values in `oauth_secret.sh` and add users to `data/users.json`., then run the deployment script:
+Fill OAuth values in `oauth_secret.sh` and add users to `data/users.json`, then run the deployment script:
 ```bash
 ./deploy.sh
 ```
