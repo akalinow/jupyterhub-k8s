@@ -80,6 +80,22 @@ hub:
             "JUPYTERHUB_USER": "{username}",
             "JUPYTERHUB_USER_ESCAPED": "{escaped_username}"
         }
+      04-named-servers-restriction.py: |
+        # Restrict named servers to specific users
+        # Add usernames (email addresses) of users allowed to use named servers
+        allowed_named_server_users = {
+            # Example: "user@uw.edu.pl",
+            # Add more users here
+        }
+        
+        def named_server_limit(spawner):
+            """Return named server limit based on user"""
+            user_name = spawner.user.name
+            if user_name in allowed_named_server_users or spawner.user.admin:
+                return 5  # Allow up to 5 named servers for authorized users and admins
+            return 0  # No named servers for other users
+        
+        c.JupyterHub.named_server_limit_per_user = named_server_limit
   config:
     Authenticator: {}
     GoogleOAuthenticator:
@@ -91,6 +107,8 @@ hub:
     #######################################
     JupyterHub:
         authenticator_class: google
+        allow_named_servers: true
+        shutdown_on_logout: false
         template_paths: 
           - "/usr/local/share/jupyterhub/custom_templates/"
         template_vars:
@@ -218,11 +236,12 @@ hub:
               echo -e "      ▝▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▘\e[0m"
               echo ""
               
-              if [[ -f /etc/os-release ]] && grep -Eq '^(ID|ID_LIKE)=.*(rhel|centos|almalinux|rocky)' /etc/os-release; \
-                 then
-                echo -e "\e[94mAvailable environment setup functions:\e[0m lcg, ilc"
-              fi
-              
+              echo -e "\e[94mAvailable environment setup functions:\e[0m"
+              echo -e "\e[94m  lcg()  - \e[0m cvmfs setup of the LCG software environment\e[0m"
+              echo -e "\e[94m  ilc()  - \e[0m cvmfs setup of the ILC software environment\e[0m"
+              echo -e "\e[94m  cms() -  \e[0m start EL9 container with CMS software environment\e[0m"
+              echo -e "\e[94m  Usage: \e[0m just type the function name to activate the environment\e[0m"
+                          
               EOF
 
               cat << EOF > $HOME/.jupyter/jupyter_server_config.py

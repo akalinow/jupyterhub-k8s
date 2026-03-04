@@ -1,7 +1,7 @@
 #!/bin/sh
 #run ls command on a list of directories to trigger cvmfs fetch of files in those directories
 
-printf "\033[1;36mListing /cvmfs/sft.cern.ch/lcg/{LCG_VERSION}/${LCG_ARCH}/setup.sh \033[0m\n"
+printf "\033[1;36mListing /cvmfs/sft.cern.ch/lcg/${LCG_VERSION}/${LCG_ARCH}/setup.sh \033[0m\n"
 ls -l /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/setup.sh
 
 printf "\033[1;36mSourcing /cvmfs/sft.cern.ch/lcg/${LCG_VERSION}/${LCG_ARCH}/setup.sh \033[0m\n"
@@ -9,7 +9,7 @@ source /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/setup.sh
 
 # Define list of directories (POSIX compatible - space-separated)
 DIRS="
-/cvmfs/sft.cern.ch/lcg/views/*${LCG_VERSION}/${LCG_ARCH}/share/jupyter/kernels/
+/cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/share/jupyter/kernels/
 /cvmfs/cms.cern.ch/el9_amd64_gcc12/cms/cmssw
 $ROOTSYS
 "

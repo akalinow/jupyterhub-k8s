@@ -29,7 +29,7 @@ export LCG_ARCH=x86_64-el9-gcc12-opt
 kubectl create configmap configs --from-literal=LCG_VERSION=$LCG_VERSION --from-literal=LCG_ARCH=$LCG_ARCH
 
 ## Add scratch volume from bare-metal storage
-minikube mount /scratch:/scratch &
+minikube mount /scratch0:/scratch &
 kubectl apply -f scratch/volumes.yaml
 
 ## Add cvmfs 
