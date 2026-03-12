@@ -3,8 +3,9 @@ K8S configuration of jupyterhub for Faculty of Physics, University of Warsaw.
 Setup includes: 
 
 * authentication via Google OAuth, with allowed users listed in a secret
-* user directories are persisted on a volume [mounted](deploy.sh#L32) from the bare-metal host
+* user directories are persisted on a volume [mounted](deploy.sh#L32) from the bare-metal  directory mounted as `scratch`
 * access to cvmfs repositories, listed in [cvmfs/config.yaml](cvmfs/config.yaml)
+* cvmfs cache on bare metal directory mounted as `scratch`
 * custom spawn page
 
 ## Prerequisites

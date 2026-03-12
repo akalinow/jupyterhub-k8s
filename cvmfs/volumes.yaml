@@ -33,3 +33,37 @@ spec:
     requests:
       storage: 100Gi
 ---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: cvmfs-cache
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: Immediate
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: cvmfs-cache-pv
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: cvmfs-cache
+  hostPath:
+    path: /scratch/jupyterhub/cvmfs-cache
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cvmfs-cache-pvc
+spec:
+  storageClassName: cvmfs-cache
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+---

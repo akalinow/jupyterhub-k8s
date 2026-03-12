@@ -80,22 +80,6 @@ hub:
             "JUPYTERHUB_USER": "{username}",
             "JUPYTERHUB_USER_ESCAPED": "{escaped_username}"
         }
-      04-named-servers-restriction.py: |
-        # Restrict named servers to specific users
-        # Add usernames (email addresses) of users allowed to use named servers
-        allowed_named_server_users = {
-            # Example: "user@uw.edu.pl",
-            # Add more users here
-        }
-        
-        def named_server_limit(spawner):
-            """Return named server limit based on user"""
-            user_name = spawner.user.name
-            if user_name in allowed_named_server_users or spawner.user.admin:
-                return 5  # Allow up to 5 named servers for authorized users and admins
-            return 0  # No named servers for other users
-        
-        c.JupyterHub.named_server_limit_per_user = named_server_limit
   config:
     Authenticator: {}
     GoogleOAuthenticator:
@@ -107,7 +91,7 @@ hub:
     #######################################
     JupyterHub:
         authenticator_class: google
-        allow_named_servers: true
+        allow_named_servers: false
         shutdown_on_logout: false
         template_paths: 
           - "/usr/local/share/jupyterhub/custom_templates/"
@@ -120,6 +104,12 @@ hub:
       cpu_guarantee: 0.5
       mem_limit: 8G
       mem_guarantee: 1G
+
+      container_security_context:
+        capabilities:
+          add:
+            - CHOWN
+            - FOWNER
       
       # Increase spawn timeout for slow initialization (LCG setup, etc.)
       http_timeout: 120
@@ -160,8 +150,8 @@ hub:
               cp -rL /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/share/jupyter/kernels/* $KERNEL_DIR/
               cp -rL /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/etc/notebook/kernels/* $KERNEL_DIR/
 
-              # Link tutorials to user home
-              ln -s /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/share/jupyter/tutorials $HOME/tutorials
+              # Copy tutorials to user home (link does not work in this setup)
+              cp -r /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/share/jupyter/tutorials $HOME/ROOT_tutorials
 
               #Remove R kernel which does not work in this setup
               rm -rf $KERNEL_DIR/ir

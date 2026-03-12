@@ -1,6 +1,13 @@
 #!/bin/sh
 #run ls command on a list of directories to trigger cvmfs fetch of files in those directories
 
+#Fetch CMSSW
+source /opt/cms/entrypoint.sh
+printf "\033[1;36mFetching CMSSW\033[0m\n"
+scramv1 project CMSSW CMSSW_15_0_19
+cd CMSSW_15_0_19/src
+eval `scramv1 runtime -sh`
+
 printf "\033[1;36mListing /cvmfs/sft.cern.ch/lcg/${LCG_VERSION}/${LCG_ARCH}/setup.sh \033[0m\n"
 ls -l /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/setup.sh
 
@@ -9,7 +16,7 @@ source /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/setup.sh
 
 # Define list of directories (POSIX compatible - space-separated)
 DIRS="
-/cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/share/jupyter/kernels/
+/cvmfs/sft.cern.ch/lcg/views/LCG_${LCG_VERSION}/${LCG_ARCH}/share/jupyter/kernels/
 /cvmfs/cms.cern.ch/el9_amd64_gcc12/cms/cmssw
 $ROOTSYS
 "
