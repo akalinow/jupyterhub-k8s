@@ -1,13 +1,17 @@
 #!/bin/sh
 #run ls command on a list of directories to trigger cvmfs fetch of files in those directories
 
-#Fetch CMSSW
+# Fetch CMSSW
 source /opt/cms/entrypoint.sh
 printf "\033[1;36mFetching CMSSW\033[0m\n"
-scramv1 project CMSSW CMSSW_15_0_19
-cd CMSSW_15_0_19/src
-eval `scramv1 runtime -sh`
+scramv1 project CMSSW CMSSW_15_1_11
+cd CMSSW_15_1_1/src
+cmsrel
+mkdir L1Trigger
+cp -r $CMSSW_RELEASE_BASE/src/L1Trigger/Phase2GMT .
+scram b -j 4
 
+# Fetch LCG software
 printf "\033[1;36mListing /cvmfs/sft.cern.ch/lcg/${LCG_VERSION}/${LCG_ARCH}/setup.sh \033[0m\n"
 ls -l /cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_ARCH}/setup.sh
 

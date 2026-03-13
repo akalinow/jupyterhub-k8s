@@ -104,13 +104,7 @@ hub:
       cpu_guarantee: 0.5
       mem_limit: 8G
       mem_guarantee: 1G
-
-      container_security_context:
-        capabilities:
-          add:
-            - CHOWN
-            - FOWNER
-      
+            
       # Increase spawn timeout for slow initialization (LCG setup, etc.)
       http_timeout: 120
       start_timeout: 120
@@ -253,9 +247,6 @@ hub:
                     - |    
                       mkdir -p $HOME/.jupyter
 
-
-
-
         - display_name: "AI/ML"
           description: "Ubuntu with TensorFlow, PyTorch and GPU support"
           kubespawner_override:
@@ -281,8 +272,26 @@ hub:
 #######################################################
 singleuser: 
   startTimeout: 600
+  uid: 1000
+  fsGid: 100
   cmd: 
     - jupyterhub-singleuser
+  initContainers:
+    - name: fix-home-ownership
+      #image: busybox
+      image: gitlab-registry.cern.ch/akalinow/cmssw-docker/el9-cms:latest
+      imagePullPolicy: IfNotPresent
+      securityContext:
+        runAsUser: 0
+      command:
+        - sh
+        - -c
+        - |
+          mkdir -p /mnt/scratch
+          chown -R 1000:100 /mnt/scratch/*uw-edu-pl* || true
+      volumeMounts:
+        - name: scratch-local
+          mountPath: /mnt/scratch
   cpu:
     limit: 2
     guarantee: 0.5
