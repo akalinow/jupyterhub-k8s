@@ -116,6 +116,7 @@ hub:
           description: "Centos9 with CVMFS support for HEP software"
           kubespawner_override:
             image: gitlab-registry.cern.ch/akalinow/cmssw-docker/el9-cms:latest
+            image_pull_policy: IfNotPresent
             #image_pull_policy: Always
             default: true
             cpu_limit: 8
@@ -278,7 +279,6 @@ singleuser:
     - jupyterhub-singleuser
   initContainers:
     - name: fix-home-ownership
-      #image: busybox
       image: gitlab-registry.cern.ch/akalinow/cmssw-docker/el9-cms:latest
       imagePullPolicy: IfNotPresent
       securityContext:

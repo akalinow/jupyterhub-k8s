@@ -9,13 +9,22 @@ LOCAL_SCRATCH_DIR='/scratch0'
 ## Start minikube
 minikube start --mount --mount-string=$LOCAL_SCRATCH_DIR:/scratch --mount-type=virtiofs \
 --driver=$MINIKUBE_DRIVER --kubernetes-version=$KUBERNETES_VERSION \
---container-runtime=docker --gpus all
+--container-runtime=docker --gpus all \
+--docker-opt dns=1.1.1.1 --docker-opt dns=8.8.8.8
+
+minikube ssh -- "cat <<'EOF' | sudo tee /etc/resolv.conf >/dev/null
+nameserver 1.1.1.1
+nameserver 8.8.8.8
+options timeout:2 attempts:2
+EOF"
+
+
 
 ## Setup storage class and volumes
 kubectl apply -f scratch/volumes.yaml
 
 ## Setup network forwarding for external access
-./scripts/setup_network.sh
+#./scripts/setup_network.sh
 
 ## Create TLS secret
 kubectl create secret tls tls-secret --cert=cert.pem --key=key_pkcs1.pem 
