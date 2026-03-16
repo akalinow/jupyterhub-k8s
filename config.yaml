@@ -224,7 +224,6 @@ hub:
               echo -e "\e[94mAvailable environment setup functions:\e[0m"
               echo -e "\e[94m  lcg()  - \e[0m cvmfs setup of the LCG software environment\e[0m"
               echo -e "\e[94m  ilc()  - \e[0m cvmfs setup of the ILC software environment\e[0m"
-              echo -e "\e[94m  cms() -  \e[0m start EL9 container with CMS software environment\e[0m"
               echo -e "\e[94m  Usage: \e[0m just type the function name to activate the environment\e[0m"
                           
               EOF
@@ -279,7 +278,7 @@ singleuser:
     - jupyterhub-singleuser
   initContainers:
     - name: fix-home-ownership
-      image: gitlab-registry.cern.ch/akalinow/cmssw-docker/el9-cms:latest
+      image: busybox
       imagePullPolicy: IfNotPresent
       securityContext:
         runAsUser: 0

@@ -18,8 +18,6 @@ nameserver 8.8.8.8
 options timeout:2 attempts:2
 EOF"
 
-
-
 ## Setup storage class and volumes
 kubectl apply -f scratch/volumes.yaml
 
@@ -42,6 +40,11 @@ kubectl create configmap jupyterhub-templates --from-file=assets/spawn.html
 export LCG_VERSION=LCG_105
 export LCG_ARCH=x86_64-el9-gcc12-opt
 kubectl create configmap configs --from-literal=LCG_VERSION=$LCG_VERSION --from-literal=LCG_ARCH=$LCG_ARCH
+
+# Prefetch container images
+kubectl pull gitlab-registry.cern.ch/akalinow/cmssw-docker/el9-cms:latest
+kubectl pull akalinow/tensorflow-gpu:TF2.20
+kubectl pull busybox:latest
 
 ## Add cvmfs 
 helm repo add sciencebox https://registry.cern.ch/chartrepo/sciencebox
