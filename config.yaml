@@ -222,7 +222,7 @@ hub:
               echo ""
               
               echo -e "\e[94mAvailable environment setup functions:\e[0m"
-              echo -e "\e[94m  lcg()  - \e[0m cvmfs setup of the LCG software environment\e[0m"
+              echo -e "\e[94m  lcg()  - \e[0m cvmfs setup of the LCG software environment (ROOT, Pythia, G4, etc.)\e[0m"
               echo -e "\e[94m  ilc()  - \e[0m cvmfs setup of the ILC software environment\e[0m"
               echo -e "\e[94m  Usage: \e[0m just type the function name to activate the environment\e[0m"
                           
