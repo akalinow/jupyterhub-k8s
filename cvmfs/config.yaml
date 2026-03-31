@@ -8,6 +8,9 @@ repositories:
   - grid.cern.ch
   - ilc.desy.de
   - nova.opensciencegrid.org
+  - dune.opensciencegrid.org
+  - larsoft.opensciencegrid.org
+  - fermilab.opensciencegrid.org
 
 prefetcher:
   enabled: true
