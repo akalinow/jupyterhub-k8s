@@ -116,8 +116,8 @@ hub:
           description: "ROOT, Pythia, Geant4, etc."
           kubespawner_override:
             image: gitlab-registry.cern.ch/akalinow/cmssw-docker/el9-cms:latest
-            image_pull_policy: IfNotPresent
-            #image_pull_policy: Always
+            #image_pull_policy: IfNotPresent
+            image_pull_policy: Always
             default: true
             cpu_limit: 8
             cpu_guarantee: 0.5
@@ -293,7 +293,6 @@ hub:
             - /bin/bash
             - -lc
             - |
-
               #Remove tensorflow from LD_LIBRARY_PATH to avoid conflicts with the version installed in the image
               export LD_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | tr ':' '\n' | grep -v 'tensorflow' | tr '\n' ':')
               #Start JupyterHub singleuser process
@@ -307,7 +306,75 @@ hub:
                       - |    
                         # Remove kennels installed by LCG
                         KERNEL_DIR=$HOME/.local/share/jupyter/kernels
-                        rm -rf $KERNEL_DIR/*              
+                        rm -rf $KERNEL_DIR/*    
+        - display_name: "OpenMC"
+          description: "OpenMC for reactor studies"
+          kubespawner_override:
+            image: docker.io/akalinow/openmc:latest
+            #image_pull_policy: Always
+            cpu_limit: 8
+            cpu_guarantee: 0.5
+            mem_limit: 32G
+            mem_guarantee: 8G
+            nvidia.com/gpu: "0"
+            cmd:
+            - /bin/bash
+            - -lc
+            - |
+              #Start JupyterHub singleuser process
+              exec jupyterhub-singleuser
+
+            lifecycle_hooks:
+              postStart:
+                  exec:
+                    command:
+                      - /bin/bash
+                      - -c
+                      - | 
+                        cat << EOF > $HOME/.bash_profile
+                        export PS1='[\t] \[\e[91m\]hepuser\[\e[0m\] '
+                       
+                        echo -e "\e[31m      ▗▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▖"
+                        echo -e "     ▟██████████████████████████████████████▙"
+                        echo -e "    ▟█▀▀                                ▀▀█▙"
+                        echo -e "   ▟█    \e[30m███████╗ ██████╗██╗ ██████╗ ███████╗\e[31m   █▙"
+                        echo -e "  ▟█     \e[30m╚══███╔╝██╔════╝██║██╔═══██╗██╔════╝\e[31m    █▙"
+                        echo -e " ▟█        \e[30m███╔╝ ██║     ██║██║   ██║█████╗\e[31m       █▙"
+                        echo -e " ▜█       \e[30m███╔╝  ██║     ██║██║   ██║██╔══╝\e[31m       ▛█"
+                        echo -e "  ▜█     \e[30m███████╗╚██████╗██║╚██████╔╝██║\e[31m         ▛█"
+                        echo -e "   ▜█    \e[30m╚══════╝ ╚═════╝╚═╝ ╚═════╝ ╚═╝\e[31m        ▛█"
+                        echo -e "    ▜█▄▄                                ▄▄█▛"
+                        echo -e "     ▜██████████████████████████████████████▛"
+                        echo -e "      ▝▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▘\e[0m"
+                        echo ""
+
+                        alias rm='rm -i'
+                        alias ls='ls --color=auto'                          
+                        EOF
+
+                        mkdir -p  /home/jovyan/.jupyter/lab/user-settings/@jupyterlab/filebrowser-extension/
+                        cat << EOF > /home/jovyan/.jupyter/lab/user-settings/@jupyterlab/notebook-extension/tracker.jupyterlab-settings
+                        {
+                            "codeCellConfig": {
+                                "lineNumbers": true
+                            }
+                        }
+                        EOF
+                                  
+                        cat << EOF > $HOME/.jupyter/jupyter_server_config.py
+                        c.ServerApp.terminado_settings = {
+                          "shell_command": ["/bin/bash","-l","-i"]
+                        }
+                        c.LabApp.page_config_data = {
+                        "defaultViewers": {
+                            "json": "Editor"
+                          }
+                        }
+                        EOF   
+                        # Remove kennels installed by LCG
+                        KERNEL_DIR=$HOME/.local/share/jupyter/kernels
+                        rm -rf $KERNEL_DIR/* 
+                                            
 #######################################################
 #######################################################
 singleuser: 
