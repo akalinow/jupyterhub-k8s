@@ -31,11 +31,13 @@ cd jupyterhub-k8s
 
 Set the TLS certificate and key for the server if you do not have them already.
 Note selfsigned certificate will generate a warning in the browser.
-Use the pkcs1 format for the key, as the pkcs8 format is not supported by jupyterhub:
+Use the pkcs1 format for the key, as the pkcs8 format is not supported by jupyterhub.
+Use your server's hostname in the certificate's common name (CN) field 
 
 ```bash
-openssl req -x509 -nodes -newkey rsa:2048 -keyout key.pem -out cert.pem -days 99999
-openssl pkcs8 -topk8 -inform PEM -outform PEM -in key.pem -out key_pkcs1.pem -nocrypt
+openssl req -x509 -nodes -newkey rsa:2048 -keyout jupyterhub_CA.key \
+        -out jupyterhub_CA.crt -subj "/CN=hostname" -days 99999
+openssl pkcs8 -topk8 -inform PEM -outform PEM -in jupyterhub_CA.key -out jupyterhub_CA_pkcs1.pem -nocrypt
 ```
 Fill OAuth values in `oauth_secret.sh` and add users to `data/users.json`, then run the deployment script:
 ```bash

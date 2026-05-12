@@ -261,8 +261,8 @@ hub:
           description: "TensorFlow, PyTorch and GPU support"
           kubespawner_override:
             #image: quay.io/jupyter/tensorflow-notebook:cuda-latest
-            image: akalinow/tensorflow-gpu:TF2.20
-            #image_pull_policy: Always
+            image: akalinow/tensorflow-gpu:TF2.21
+            image_pull_policy: Always
             cpu_limit: 8
             cpu_guarantee: 0.5
             mem_limit: 128G

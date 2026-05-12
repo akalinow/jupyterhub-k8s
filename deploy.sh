@@ -25,7 +25,7 @@ kubectl apply -f scratch/volumes.yaml
 #./scripts/setup_network.sh
 
 ## Create TLS secret
-kubectl create secret tls tls-secret --cert=cert.pem --key=key_pkcs1.pem 
+kubectl create secret tls tls-secret --cert=jupyterhub_CA.crt --key=jupyterhub_CA_pkcs1.pem 
 
 ## Add OAuth secret
 ./scripts/oauth_secret.sh
