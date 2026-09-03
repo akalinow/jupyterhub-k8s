@@ -42,9 +42,9 @@ export LCG_ARCH=x86_64-el9-gcc12-opt
 kubectl create configmap configs --from-literal=LCG_VERSION=$LCG_VERSION --from-literal=LCG_ARCH=$LCG_ARCH
 
 # Prefetch container images
-kubectl pull gitlab-registry.cern.ch/akalinow/cmssw-docker/el9-cms:latest
-kubectl pull akalinow/tensorflow-gpu:TF2.20
-kubectl pull busybox:latest
+kubectl run busybox --rm -it --image=gitlab-registry.cern.ch/akalinow/cmssw-docker/el9-cms:latest -- /bin/sh
+kubectl run busybox --rm -it --image=kalinow/tensorflow-gpu:TF2.20 -- /bin/sh
+kubectl run busybox --rm -it --image=busybox:latest -- /bin/sh
 
 ## Add cvmfs 
 helm repo add sciencebox https://registry.cern.ch/chartrepo/sciencebox
